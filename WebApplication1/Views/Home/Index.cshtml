@@ -1,0 +1,202 @@
+﻿@model IEnumerable<WebApplication1.Models.Employee>
+
+@{
+    ViewBag.Title = "Employee List";
+    var employee = ViewBag.model as WebApplication1.Models.Employee;
+}
+
+<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#FormModelEmployee">Add New</a>
+<div class="modal fade" id="FormModelEmployee">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title center-block">Add New</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="FormData" method="post">
+                    @Html.TextBoxFor(modal => employee.Name, new { @class = "form-control", placeholder = "Name" })
+                    @Html.TextBoxFor(modal => employee.Address, new { @class = "form-control", placeholder = "Address" })
+                    @Html.TextBoxFor(modal => employee.Phone, new { @class = "form-control", placeholder = "Phone" })
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="btn_add">Add New</a>
+                <a href="#" class="btn btn-danger" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModelEmployeeUpdate">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title center-block">Update Employee</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="FormDataUpdate" method="post">
+                    @Html.HiddenFor(model => employee.ID, new {@id="employeeID"})
+                    @Html.TextBoxFor(modal => employee.Name, new { @class = "form-control", placeholder = "Name", @id="employeeName" })
+                    @Html.TextBoxFor(modal => employee.Address, new { @class = "form-control", placeholder = "Address", @id="employeeAddress" })
+                    @Html.TextBoxFor(modal => employee.Phone, new { @class = "form-control", placeholder = "Phone", @id="employeePhone"})
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="btn_update">Save</a>
+                <a href="#" class="btn btn-danger" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModelEmployeeDelete">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title center-block">Delete Employee</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5>Are you sure you want to delete this?</h5>
+                <input type="hidden" id="id_Del"/>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="btn_delete">Delete</a>
+                <a href="#" class="btn btn-danger" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Address</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Address</td>
+                <td>@item.Phone</td>
+                <td>
+                    <a href="#" class="btn btn-success" onclick="GetEmployeeById(@item.ID)">Edit</a>
+                    <a href="#" class="btn btn-danger" onclick="GetId(@item.ID)">Delete</a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+@section scripts{
+    <!-- Sweet Alert -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#btn_add").click(function () {
+                var Dataform = $("#FormData").serialize();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/Create",
+                    data: Dataform,
+
+                    success: function () {
+                        $('#FormModelEmployee').modal('hide');
+                        swal("Success!", "Succesfully Added", "success").then((value) => {
+                            window.location.href = "/Home/Index";
+                        });
+                    }
+                })
+            })
+        })
+
+        function GetEmployeeById(ID) {
+            var url = "/Home/GetEmployeeeById?id=" + ID;
+            $('#FormModelEmployeeUpdate').modal('show');
+
+            $.ajax({
+                type: "GET",
+                url: url,
+
+                success: function (response) {
+                    var obj = JSON.parse(response);
+
+                    $('#employeeId').val(obj.ID);
+                    $('#employeeName').val(obj.Name);
+                    $('#employeeAddress').val(obj.Address);
+                    $('#employeePhone').val(obj.Phone);
+                }
+            })
+        }
+        $('#btn_update').click(function () {
+            var DataFormUpdate = $('#FormDataUpdate').serialize();
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Update",
+                data: DataFormUpdate,
+
+                success: function (response) {
+                    if (response.status == true) {
+                        $('#FormModelEmployeeUpdate').modal('hide');
+                        swal("Success!", "Updated Successfully", "success").then((value) => {
+                            window.location.href = "/Home/Index";
+                        });
+                    }
+                    else
+                    {
+                        $('#FormModelEmployeeUpdate').modal('hide');
+                        swal("Error!", response.messsage , "error").then((value) => {
+                            window.location.href = "/Home/Index";
+                        });
+                    }
+                }
+            })
+        })
+        function GetId(ID) {
+            $('#id_Del').val(ID);
+            $('#FormModelEmployeeDelete').modal('show');
+        }
+        $('#btn_delete').click(function () {
+            var data_id = $('#id_Del').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Delete",
+                data: {id: data_id},
+
+                success: function (response) {
+                    if (response.status == true) {
+                        $('#FormModelEmployeeDelete').modal('hide');
+                        swal("Success!", "Deleted Successfully", "success").then((value) => {
+                            window.location.href = "/Home/Index";
+                        });
+                    }
+                    else { 
+                        $('#FormModelEmployeeDelete').modal('hide');
+                        swal("Error!", response.messsage, "error").then((value) => {
+                            window.location.href = "/Home/Index";
+                        });
+                    }
+                }
+            })
+
+        })
+    </script>
+}   
