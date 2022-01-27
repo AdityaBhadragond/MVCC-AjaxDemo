@@ -20,14 +20,10 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public ActionResult Create(Employee employee)
         {
-            if (ModelState.IsValid)
-            {
                 var db = new Model1();
                 db.Employees.Add(employee);
                 db.SaveChanges();
-                return RedirectToAction("Index", "Home");
-            }
-            return View("Index");
+            return RedirectToAction("Index","Home");
         }
         [HttpGet]
         public JsonResult GetEmployeeById(int id)
@@ -41,7 +37,7 @@ namespace WebApplication1.Controllers
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
-        
+            
             return Json(values, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
