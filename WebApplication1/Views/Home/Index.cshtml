@@ -113,15 +113,13 @@
                 var Dataform = $("#FormData").serialize();
 
                 $.ajax({
-                    async: false,
                     type: "POST",
                     url: "/Home/Create",
                     data: Dataform,
                     success: function () {
                         $('#FormModelEmployee').modal('hide');
                         swal("Success!", "Succesfully Added", "success").then((value) => {
-                            event.preventDefault()
-                            window.location.href = "/Home/Index";
+                            window.location.reload(true);
                         });
                     }
                 })
