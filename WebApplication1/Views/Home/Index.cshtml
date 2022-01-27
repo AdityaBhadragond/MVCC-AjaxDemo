@@ -119,7 +119,8 @@
                     success: function () {
                         $('#FormModelEmployee').modal('hide');
                         swal("Success!", "Succesfully Added", "success").then((value) => {
-                            window.location.reload(true);
+                            event.preventDefault();
+                            location.assign("/Home/Index");
                         });
                     }
                 })
